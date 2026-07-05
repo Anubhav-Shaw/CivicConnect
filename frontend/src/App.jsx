@@ -163,7 +163,7 @@ export default function App() {
           ) : (
             <>
               <button onClick={() => { setShowAuthModal(true); setAuthMode('signin'); setSignupError(''); }}>Sign In</button>
-              <button className="btn-primary" onClick={() => { setShowAuthModal(true); setAuthMode('signup'); setSignupError(''); setSignupRole('Citizen'); setSignupPin(''); }}>Get Started</button>
+              <button className="btn-primary" onClick={() => { setShowAuthModal(true); setAuthMode('signup'); setSignupError(''); setSignupRole('Citizen'); setSignupPin(''); }}>Sign Up</button>
             </>
           )}
         </div>

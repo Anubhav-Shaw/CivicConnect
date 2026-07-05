@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(cors());
 
-mongoose.connect('mongodb://127.0.0.1:27017/civicroots')
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/civicroots')
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
@@ -220,4 +220,5 @@ app.delete('/api/events/:id', async (req, res) => {
   await EventItem.findByIdAndDelete(req.params.id); res.json({ success: true });
 });
 
-app.listen(5000, () => console.log('🚀 Backend running on http://localhost:5000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));

@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --bg-main: #010409; --bg-alt: #0d1117; --bg-nav: rgba(13, 17, 23, 0.85); --bg-card: #161b22;
+  --text-main: #ffffff; --text-muted: #8b949e; --border-color: #30363d;
+  --primary-green: #00d284; --primary-green-hover: #00b370;
+  --chat-other: #161b22; --chat-own: rgba(0, 210, 132, 0.15);
+}
+
+[data-theme="light"] {
+  --bg-main: #f6f8fa; --bg-alt: #ffffff; --bg-nav: rgba(255, 255, 255, 0.9); --bg-card: #ffffff;        
+  --text-main: #24292f; --text-muted: #57606a; --border-color: #d0d7de;
+  --primary-green: #00a86b; --primary-green-hover: #008f5a;
+  --chat-other: #f6f8fa; --chat-own: #e6ffec;
+}
+
+/* Forcing edge-to-edge layout by killing Vite's default padding/margins */
+body, html { 
+  margin: 0 !important; 
+  padding: 0 !important; 
+  width: 100% !important;
+  font-family: 'Inter', sans-serif; 
+  background-color: var(--bg-main); 
+  color: var(--text-main); 
+  overflow-x: hidden; 
+  transition: background-color 0.4s ease, color 0.4s ease; 
+}
+
+#root { 
+  width: 100% !important; 
+  max-width: none !important; /* This breaks the box constraint */
+  margin: 0 !important; 
+  padding: 0 !important; 
+  text-align: left !important;
+}
+
+/* Dynamic Ambient Leaves Animation */
+.hero-section { position: relative; text-align: center; padding: 8rem 1.5rem 6rem 1.5rem; background-color: var(--bg-main); overflow: hidden; }
+.leaves-container { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.leaf { position: absolute; background: var(--primary-green); width: 8px; height: 8px; border-radius: 50% 0 50% 0; opacity: 0.3; animation: floatLeaf linear infinite; }
+@keyframes floatLeaf { 
+  0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; } 
+  10% { opacity: 0.5; } 
+  90% { opacity: 0.5; } 
+  100% { transform: translateY(-100px) rotate(360deg) scale(1.5); opacity: 0; } 
+}
+
+.hero-content { position: relative; z-index: 1; }
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 5%; position: sticky; top: 0; z-index: 100; background: var(--bg-nav); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+.logo { color: var(--primary-green); font-weight: 700; font-size: 1.5rem; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.nav-links { display: flex; gap: 1rem; align-items: center; }
+
+/* Notification Bell & Role Dropdown */
+.bell-icon { position: relative; cursor: pointer; font-size: 1.5rem; background: none; border: none; }
+.bell-badge { position: absolute; top: -5px; right: -5px; background: #ff4d4d; color: white; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 50%; }
+.role-select { background: var(--bg-card); color: var(--primary-green); border: 1px solid var(--primary-green); padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; }
+
+.btn-primary { background-color: var(--primary-green); color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s ease; }
+.btn-primary:hover { background-color: var(--primary-green-hover); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0, 210, 132, 0.3); }
+.btn-primary:disabled { background-color: #555; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-outline { background-color: transparent; color: var(--text-main); padding: 0.75rem 1.5rem; border-radius: 30px; font-weight: 600; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s ease; }
+.btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
+.btn-small { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 20px; }
+
+.hero-section h1 { color: var(--text-main); font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 300; margin-bottom: 1.2rem; line-height: 1.1; letter-spacing: -1px; }
+.hero-section h1 span { color: var(--primary-green); font-weight: 600; }
+.hero-section p { color: var(--text-muted); font-size: clamp(1.1rem, 2vw, 1.25rem); max-width: 650px; margin: 0 auto 3rem auto; line-height: 1.6; }
+
+.features-section, .hub-section { padding: 5rem 2rem; background-color: var(--bg-alt); border-top: 1px solid var(--border-color); }
+.features-grid { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+.feature-card { background: var(--bg-card); padding: 2.5rem 2rem; border-radius: 20px; width: 100%; max-width: 340px; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.4s; }
+.feature-card:hover { transform: translateY(-10px); border-color: var(--primary-green); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
+.hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 768px) { .hub-grid { grid-template-columns: 1fr; } }
+.site-footer { background-color: var(--bg-nav); padding: 2rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.modal-content { background: var(--bg-card); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid var(--border-color); position: relative; max-height: 90vh; overflow-y: auto; }
+.close-btn { position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+.auth-form input, .auth-form select, .auth-form textarea { width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; margin-bottom: 10px; }
+.profile-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--primary-green); display: flex; justify-content: center; align-items: center; color: #000; font-weight: 700; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; }

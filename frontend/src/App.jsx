@@ -19,6 +19,10 @@ const ROLE_PINS = {
   Admin: 'ADMIN1234'
 };
 
+// Backend URL — reads from Vite environment variable when deployed (set VITE_API_URL on Vercel),
+// falls back to localhost for local development.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function App() {
   const [theme, setTheme] = useState('dark');
   const [currentUser, setCurrentUser] = useState(null);
@@ -55,15 +59,15 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const resIssues = await fetch('http://localhost:5000/api/issues');
+      const resIssues = await fetch(`${API_URL}/api/issues`);
       setIssues(await resIssues.json());
-      const resNotif = await fetch('http://localhost:5000/api/notifications');
+      const resNotif = await fetch(`${API_URL}/api/notifications`);
       setNotifications(await resNotif.json());
-      const resSettings = await fetch('http://localhost:5000/api/settings');
+      const resSettings = await fetch(`${API_URL}/api/settings`);
       setUiSettings(await resSettings.json());
-      const resBlogs = await fetch('http://localhost:5000/api/blogs');
+      const resBlogs = await fetch(`${API_URL}/api/blogs`);
       setBlogs(await resBlogs.json());
-      const resEvents = await fetch('http://localhost:5000/api/events');
+      const resEvents = await fetch(`${API_URL}/api/events`);
       setEvents(await resEvents.json());
     } catch (e) {}
   };
@@ -79,7 +83,7 @@ export default function App() {
     const email = e.target.elements[mode === 'signup' ? 1 : 0].value;
     const password = e.target.elements[mode === 'signup' ? 2 : 1].value;
     const name = mode === 'signup' ? e.target.elements[0].value : undefined;
-    const endpoint = mode === 'signup' ? 'http://localhost:5000/api/signup' : 'http://localhost:5000/api/signin';
+    const endpoint = mode === 'signup' ? `${API_URL}/api/signup` : `${API_URL}/api/signin`;
 
     const body = mode === 'signup'
       ? { name, email, password, role: signupRole, pin: signupRole === 'Citizen' ? undefined : signupPin }
@@ -99,7 +103,7 @@ export default function App() {
     e.preventDefault();
     const key = e.target.elements[0].value;
     try {
-      const res = await fetch('http://localhost:5000/api/upgrade-role', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email, key }) });
+      const res = await fetch(`${API_URL}/api/upgrade-role`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: currentUser.email, key }) });
       const data = await res.json();
       if (res.ok) {
         setCurrentUser(data.user); localStorage.setItem('civicRootsUser', JSON.stringify(data.user));
@@ -109,7 +113,7 @@ export default function App() {
   };
 
   const updateUISetting = async (key, value) => {
-    await fetch('http://localhost:5000/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [key]: value }) });
+    await fetch(`${API_URL}/api/settings`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [key]: value }) });
     fetchData();
   };
 
@@ -265,7 +269,7 @@ export default function App() {
             <p>Send a live notification to all users on the platform.</p>
             <form className="auth-form" onSubmit={async (e) => {
               e.preventDefault();
-              await fetch('http://localhost:5000/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: "Official Alert", message: e.target.elements[0].value, type: 'alert' }) });
+              await fetch(`${API_URL}/api/notifications`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: "Official Alert", message: e.target.elements[0].value, type: 'alert' }) });
               fetchData(); setShowBroadcastModal(false); alert("Alert Broadcasted!");
             }}>
               <textarea placeholder="Alert Message..." required rows={3}></textarea>
@@ -296,7 +300,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
   const [showNewEventModal, setShowNewEventModal] = useState(false);
 
   useEffect(() => { if (showChatModal) fetchMessages(); }, [showChatModal]);
-  const fetchMessages = async () => { const res = await fetch('http://localhost:5000/api/messages'); setMessages(await res.json()); };
+  const fetchMessages = async () => { const res = await fetch(`${API_URL}/api/messages`); setMessages(await res.json()); };
 
   // RBAC Checks
   const canInteract = currentUser && currentUser.role !== 'Visitor';
@@ -307,11 +311,11 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
 
   const handleUpvote = async (id) => {
     if (!canInteract) return alert("Citizens only. Please sign in.");
-    await fetch(`http://localhost:5000/api/issues/${id}/upvote`, { method: 'PUT' }); fetchData();
+    await fetch(`${API_URL}/api/issues/${id}/upvote`, { method: 'PUT' }); fetchData();
   };
 
   const handleUpdateStatus = async (id, status) => {
-    await fetch(`http://localhost:5000/api/issues/${id}/status`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status, updatedBy: currentUser.name }) });
+    await fetch(`${API_URL}/api/issues/${id}/status`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ status, updatedBy: currentUser.name }) });
     fetchData(); alert("Status Updated!");
   };
 
@@ -331,7 +335,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
         ? "Moderator Action: Remove this Resolved issue?"
         : "Delete your report?";
     if (window.confirm(confirmMsg)) {
-      const res = await fetch(`http://localhost:5000/api/issues/${issue._id}?role=${currentUser.role}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/issues/${issue._id}?role=${currentUser.role}`, { method: 'DELETE' });
       const data = await res.json();
       if (res.ok) { fetchData(); } else { alert(data.message || "Not authorized."); }
     }
@@ -339,14 +343,14 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
 
   const handleDeleteBlog = async (id) => {
     if (window.confirm("Remove this blog post?")) {
-      const res = await fetch(`http://localhost:5000/api/blogs/${id}?role=${currentUser.role}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/blogs/${id}?role=${currentUser.role}`, { method: 'DELETE' });
       if (res.ok) { fetchData(); setShowBlogModal(null); } else { alert("Not authorized."); }
     }
   };
 
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Remove this event?")) {
-      const res = await fetch(`http://localhost:5000/api/events/${id}?role=${currentUser.role}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/events/${id}?role=${currentUser.role}`, { method: 'DELETE' });
       if (res.ok) { fetchData(); } else { alert("Not authorized."); }
     }
   };
@@ -482,7 +486,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
                 status: e.target.elements[3].value,
                 createdBy: currentUser.name
               };
-              const res = await fetch(`http://localhost:5000/api/events?role=${currentUser.role}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+              const res = await fetch(`${API_URL}/api/events?role=${currentUser.role}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
               if (res.ok) { fetchData(); setShowNewEventModal(false); } else { alert("Not authorized."); }
             }}>
               <input type="text" placeholder="Event Title" required />
@@ -513,7 +517,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
                 content: e.target.elements[2].value,
                 createdBy: currentUser.name
               };
-              const res = await fetch(`http://localhost:5000/api/blogs?role=${currentUser.role}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+              const res = await fetch(`${API_URL}/api/blogs?role=${currentUser.role}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
               if (res.ok) { fetchData(); setShowNewBlogModal(false); } else { alert("Not authorized."); }
             }}>
               <input type="text" placeholder="Blog Title" required />
@@ -665,7 +669,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
                 <div key={msg._id} style={{ marginBottom: '10px', background: 'var(--bg-card)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <strong style={{ fontSize: '0.8rem', color: 'var(--primary-green)' }}>{msg.sender}</strong>
-                    {canDeleteChat && <button style={{ fontSize: '0.7rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} onClick={async () => { await fetch(`http://localhost:5000/api/messages/${msg._id}?role=${currentUser.role}`, {method: 'DELETE'}); fetchMessages(); }}>[Delete]</button>}
+                    {canDeleteChat && <button style={{ fontSize: '0.7rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }} onClick={async () => { await fetch(`${API_URL}/api/messages/${msg._id}?role=${currentUser.role}`, {method: 'DELETE'}); fetchMessages(); }}>[Delete]</button>}
                   </div>
                   <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>{msg.text}</p>
                 </div>
@@ -674,7 +678,7 @@ const HomeView = ({ currentUser, issues, setCurrentPage, fetchData, setShowAuthM
             <form onSubmit={async (e) => {
               e.preventDefault();
               if(!canInteract) return alert("Sign in to post.");
-              await fetch('http://localhost:5000/api/messages', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text: e.target.elements[0].value, sender: currentUser.name}) });
+              await fetch(`${API_URL}/api/messages`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text: e.target.elements[0].value, sender: currentUser.name}) });
               e.target.reset(); fetchMessages();
             }} style={{ display: 'flex', gap: '10px' }}>
               <input type="text" required placeholder="Type a message..." style={{ flex: 1, padding: '10px', borderRadius: '20px' }} />
@@ -758,7 +762,7 @@ const ReportIssuePage = ({ currentUser, existingIssues, fetchData, setCurrentPag
     const payload = { title, category, severity, area, description, image: imageBase64, isAnonymous: false, reportedBy: currentUser.name, lat: coords.lat, lng: coords.lng };
 
     try {
-      const res = await fetch('http://localhost:5000/api/issues', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const res = await fetch(`${API_URL}/api/issues`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (res.ok) { fetchData(); setIsSuccess(true); }
       else { alert("Failed to submit."); }
     } catch (e) { alert("Server error."); }

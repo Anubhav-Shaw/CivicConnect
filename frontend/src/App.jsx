@@ -162,7 +162,7 @@ export default function App() {
             </div>
           ) : (
             <>
-              <button onClick={() => { setShowAuthModal(true); setAuthMode('signin'); setSignupError(''); }}>Sign In</button>
+              <button className="btn-primary" onClick={() => { setShowAuthModal(true); setAuthMode('signin'); setSignupError(''); }}>Sign In</button>
               <button className="btn-primary" onClick={() => { setShowAuthModal(true); setAuthMode('signup'); setSignupError(''); setSignupRole('Citizen'); setSignupPin(''); }}>Sign Up</button>
             </>
           )}
